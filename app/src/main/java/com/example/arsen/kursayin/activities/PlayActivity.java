@@ -1,14 +1,16 @@
-package com.example.arsen.kursayin;
+package com.example.arsen.kursayin.activities;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.arsen.kursayin.R;
+import com.example.arsen.kursayin.custom_views.DrawingView;
+
+public class PlayActivity extends AppCompatActivity {
 
 	private View menu;
 	private DrawingView drawingView;

@@ -1,4 +1,4 @@
-package com.example.arsen.kursayin;
+package com.example.arsen.kursayin.custom_views;
 
 import android.content.Context;
 import android.graphics.Canvas;
