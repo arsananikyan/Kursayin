@@ -24,21 +24,14 @@
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone">
-
-        <LinearLayout
+        <EditText
+            android:id="@+id/weight_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/weight_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:hint="Weight"
-                android:inputType="number"/>
-        </LinearLayout>
+            android:layout_weight="1"
+            android:gravity="center"
+            android:hint="Weight"
+            android:inputType="number"/>
 
         <Button
             android:id="@+id/done_btn"

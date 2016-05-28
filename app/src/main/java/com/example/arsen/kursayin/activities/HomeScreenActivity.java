@@ -1,10 +1,13 @@
 package com.example.arsen.kursayin.activities;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.example.arsen.kursayin.GameSettings;
 import com.example.arsen.kursayin.R;
+import com.example.arsen.kursayin.utils.Constants;
 import com.example.arsen.kursayin.utils.Utils;
 
 public class HomeScreenActivity extends AppCompatActivity implements View.OnClickListener {
@@ -20,7 +23,8 @@ public class HomeScreenActivity extends AppCompatActivity implements View.OnClic
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_home_screen);
 		initViews();
-		maxOpenedLvl = Utils.getMaxOpenedLvl(this);
+		maxOpenedLvl = GameSettings.getInstance().getMaxOpenedLvl();
+
 		if(maxOpenedLvl == 1) {
 			btnsContainer.setVisibility(View.GONE);
 		} else {
