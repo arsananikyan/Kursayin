@@ -25,6 +25,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <TextView
+        android:id="@+id/timer_text_view"
+        android:layout_below="@id/lvl_information"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:text="0"
+        android:textSize="22sp"
+        android:layout_height="wrap_content"
+        />
+
     <LinearLayout
         android:id="@+id/menu"
         android:layout_width="match_parent"
@@ -66,12 +76,34 @@
             />
 
         <Button
-            android:id="@+id/pause_btn"
+            android:id="@+id/replay_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="P"
+            android:text="R"
             />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/done_message_container"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textSize="20sp"
+            android:id="@+id/done_message_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You Loose"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:id="@+id/done_message_btn"
+            android:layout_height="wrap_content"
+            android:text="Play Again"
+            />
     </LinearLayout>
 
 

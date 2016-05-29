@@ -46,8 +46,11 @@ public class HomeScreenActivity extends AppCompatActivity implements View.OnClic
 	public void onClick(View view) {
 		if(view.getId() == R.id.continue_btn || view.getId() == R.id.start_btn) {
 			Utils.startPlayingLvl(this,maxOpenedLvl);
+			finish();
 		} else if(view.getId() == R.id.choose_lvl_btn) {
 			Utils.openLvlChooser(this);
+			finish();
 		}
 	}
+
 }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
  */
 public class GameSettings {
 	private static int MAX_LVLS_COUNT = 10;
+	private static int WIN_TIME_IN_SECONDS = 5;
 
 	private static GameSettings instance = null;
 
@@ -24,8 +25,6 @@ public class GameSettings {
 	}
 
 
-
-
 	private ArrayList<Integer> planetsCountInLvl;
 	private int maxLvlsCount;
 	private int maxOpenedLvl;
@@ -34,7 +33,8 @@ public class GameSettings {
 	private GameSettings() {
 		context = MyApplication.get().getApplicationContext();
 		maxLvlsCount = MAX_LVLS_COUNT;
-		updateMaxOpenedLvl();
+		SharedPreferences sharedPref = context.getSharedPreferences(Constants.APP_SHARED_PREFS, context.MODE_PRIVATE);
+		maxOpenedLvl = sharedPref.getInt(Constants.MAX_OPENED_LVL_PREF, 1);
 		initLvls(maxLvlsCount);
 	}
 
@@ -56,9 +56,19 @@ public class GameSettings {
 		return planetsCountInLvl.get(lvl);
 	}
 
-	public void updateMaxOpenedLvl() {
-		SharedPreferences sharedPref = context.getSharedPreferences(Constants.APP_SHARED_PREFS, context.MODE_PRIVATE);
-		maxOpenedLvl = sharedPref.getInt(Constants.MAX_OPENED_LVL_PREF, 1);
+	public void winLvl(int lvl) {
+		if(lvl == maxOpenedLvl) {
+			SharedPreferences sharedPref = context.getSharedPreferences(Constants.APP_SHARED_PREFS, context.MODE_PRIVATE);
+			SharedPreferences.Editor editor = sharedPref.edit();
+			editor.putInt(Constants.MAX_OPENED_LVL_PREF, maxOpenedLvl + 1);
+			maxOpenedLvl++;
+			editor.commit();
+		}
+	}
+
+
+	public int getWinTimeInSeconds() {
+		return WIN_TIME_IN_SECONDS;
 	}
 
 	public int getMaxLvlsCount() {

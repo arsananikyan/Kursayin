@@ -3,6 +3,7 @@ package com.example.arsen.kursayin.utils;
 import android.app.Activity;
 import android.content.Intent;
 
+import com.example.arsen.kursayin.activities.HomeScreenActivity;
 import com.example.arsen.kursayin.activities.LvlChooserActivity;
 import com.example.arsen.kursayin.activities.PlayActivity;
 
@@ -19,5 +20,10 @@ public class Utils {
 	public static void openLvlChooser(Activity activity) {
 		Intent chooserActivityIntent = new Intent(activity, LvlChooserActivity.class);
 		activity.startActivity(chooserActivityIntent);
+	}
+
+	public static void openHomeScreen(Activity activity) {
+		Intent homeScreenIntent = new Intent(activity, HomeScreenActivity.class);
+		activity.startActivity(homeScreenIntent);
 	}
 }

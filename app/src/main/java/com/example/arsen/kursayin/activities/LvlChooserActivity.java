@@ -25,7 +25,14 @@ public class LvlChooserActivity extends AppCompatActivity {
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 				Utils.startPlayingLvl(LvlChooserActivity.this,i+1);
+				finish();
 			}
 		});
+	}
+
+	@Override
+	public void onBackPressed() {
+		Utils.openHomeScreen(this);
+		finish();
 	}
 }

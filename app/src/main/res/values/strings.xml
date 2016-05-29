@@ -3,4 +3,8 @@
     <string name="start_playing">Start</string>
     <string name="continue_playing">Continue</string>
     <string name="choose_lvl">Choose Lvl</string>
+    <string name="success_btn_text">Next Lvl</string>
+    <string name="fail_btn_text">Play Again</string>
+    <string name="success_message">You Win</string>
+    <string name="fail_message">You Loose</string>
 </resources>
