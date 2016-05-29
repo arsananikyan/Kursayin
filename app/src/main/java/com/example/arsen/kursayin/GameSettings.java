@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 
 import com.example.arsen.kursayin.utils.Constants;
 
+import java.util.ArrayList;
+
 /**
  * Created by arsen on 5/28/16.
  */
@@ -16,11 +18,15 @@ public class GameSettings {
 	public static GameSettings getInstance() {
 		if (instance == null) {
 			instance = new GameSettings();
+
 		}
 		return instance;
 	}
 
 
+
+
+	private ArrayList<Integer> planetsCountInLvl;
 	private int maxLvlsCount;
 	private int maxOpenedLvl;
 	private Context context;
@@ -29,6 +35,25 @@ public class GameSettings {
 		context = MyApplication.get().getApplicationContext();
 		maxLvlsCount = MAX_LVLS_COUNT;
 		updateMaxOpenedLvl();
+		initLvls(maxLvlsCount);
+	}
+
+	private void initLvls(int maxLvlsCount) {
+		planetsCountInLvl = new ArrayList<>(maxLvlsCount);
+		/*0*/planetsCountInLvl.add(0);
+		/*1*/planetsCountInLvl.add(2);
+		/*2*/planetsCountInLvl.add(3);
+		/*3*/planetsCountInLvl.add(4);
+		/*4*/planetsCountInLvl.add(5);
+		/*5*/planetsCountInLvl.add(6);
+		/*6*/planetsCountInLvl.add(7);
+		/*7*/planetsCountInLvl.add(8);
+		/*8*/planetsCountInLvl.add(9);
+		/*9*/planetsCountInLvl.add(10);
+	}
+
+	public int getPlanetsCountInLvl(int lvl) {
+		return planetsCountInLvl.get(lvl);
 	}
 
 	public void updateMaxOpenedLvl() {

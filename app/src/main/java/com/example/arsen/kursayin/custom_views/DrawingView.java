@@ -4,26 +4,36 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by arsen on 5/18/16.
  */
 public class DrawingView extends View {
 
+	private static final float TOUCH_MOVE_THRESHOLD = 10f;
+	private static final long CLICK_DURATION_LIMIT_MS = 200;
+	private static final float PLANET_RADIUS = 30;
+	private static final long TICK_TIME = 1000 / 60;
+
 	private int width;
 	private int height;
-	private Paint paint;
+	private PointF actionDownPoint;
+	private Paint planetPaint;
+	private Paint vectorPaint;
 	private ArrayList<Planet> planets;
-	private Planet currentPlanet;
+	private Planet selectedPlanet;
 	private PlanetSelectedCallback planetSelectedCallback;
-	private final static float PLANET_RADIUS = 30;
-	private final static long TICK_TIME = 1000 / 60;
+	public DrawingMode drawingMode;
+
 	private Thread thread;
 	private Handler handler;
 
@@ -50,16 +60,28 @@ public class DrawingView extends View {
 
 	private void init(AttributeSet attrs) {
 		planets = new ArrayList<>();
-		paint = new Paint();
-		paint.setColor(Color.RED);
+
+		planetPaint = new Paint();
+
+		vectorPaint = new Paint();
+		vectorPaint.setStyle(Paint.Style.STROKE);
+		vectorPaint.setStrokeWidth(2);
+		vectorPaint.setColor(Color.RED);
+
 		handler = new Handler();
+		drawingMode = DrawingMode.DRAW_PLANET;
+		actionDownPoint = new PointF();
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		for (Planet planet : planets) {
-			canvas.drawCircle(planet.x, planet.y, PLANET_RADIUS, paint);
+			planetPaint.setColor(planet.getColor());
+			canvas.drawCircle(planet.x, planet.y, PLANET_RADIUS, planetPaint);
+			if (drawingMode != DrawingMode.FREEZE) {
+				canvas.drawPath(planet.vector.getPath(), vectorPaint);
+			}
 		}
 	}
 
@@ -67,27 +89,42 @@ public class DrawingView extends View {
 	public boolean onTouchEvent(MotionEvent event) {
 		super.onTouchEvent(event);
 		final int action = event.getActionMasked();
-
-
+		if (drawingMode == DrawingMode.FREEZE)
+			return true;
 		switch (action) {
 			case MotionEvent.ACTION_DOWN:
-				currentPlanet = new Planet(event.getX(), event.getY(), 0, 0, 0);
-				planets.add(currentPlanet);
-				if (planetSelectedCallback != null) {
-					planetSelectedCallback.onPlanetSelected(currentPlanet);
+				actionDownPoint.set(event.getX(), event.getY());
+				selectedPlanet = findPlanetIn(event.getX(), event.getY());
+				if (selectedPlanet != null && planetSelectedCallback != null) {
+					drawingMode = DrawingMode.DRAW_SPEED_VECTOR;
+					planetSelectedCallback.onPlanetSelected(selectedPlanet, false);
+					return true;
 				}
-				invalidate();
-				break;
-			case MotionEvent.ACTION_POINTER_DOWN:
-
 				break;
 			case MotionEvent.ACTION_MOVE:
-
+				if (drawingMode == DrawingMode.DRAW_SPEED_VECTOR) {
+					selectedPlanet.vector.setEndCoordinates(event.getX(),event.getY());
+					return true;
+				}
+				float x = event.getX();
+				float y = event.getY();
+				float dist = (float) Math.hypot(x - actionDownPoint.x, y - actionDownPoint.y);
+				if (dist > TOUCH_MOVE_THRESHOLD) {
+					return true;
+				}
 				break;
 			case MotionEvent.ACTION_UP:
-				break;
-
-			default:
+				if (drawingMode == DrawingMode.LET_MODIFY) return true;
+				if (event.getEventTime() - event.getDownTime() <= CLICK_DURATION_LIMIT_MS) {
+					x = event.getX();
+					y = event.getY();
+					selectedPlanet = addPlanetAndReturn(x, y);
+					if (planetSelectedCallback != null) {
+						drawingMode = DrawingMode.DRAW_SPEED_VECTOR;
+						planetSelectedCallback.onPlanetSelected(selectedPlanet, true);
+						return true;
+					}
+				}
 				break;
 		}
 
@@ -96,11 +133,11 @@ public class DrawingView extends View {
 		return true;
 	}
 
-	public void startMovie() {
+	public void startPlaying() {
 		thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				for ( ; ; ) {
+				while (true) {
 					try {
 						Thread.sleep(TICK_TIME);
 						for (Planet curPlanet : planets) {
@@ -135,17 +172,37 @@ public class DrawingView extends View {
 		thread.start();
 	}
 
-	public void pauseMovie() {
-		thread.interrupt();
-	}
-
 	private double pow3DistanceBetweenPlanets(Planet p1, Planet p2) {
-		double dist = Math.sqrt(Math.pow((p2.x - p1.x), 2) + Math.pow((p2.y - p1.y), 2));
+		double dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
 		return dist * dist * dist;
 	}
 
+	private Planet addPlanetAndReturn(float x, float y) {
+
+		Planet newPlanet = new Planet(x, y);
+		planets.add(newPlanet);
+		return newPlanet;
+	}
+
+	private Planet findPlanetIn(float x, float y) {
+		for (int i = planets.size() - 1; i >= 0; i--) {
+			if (Math.hypot(planets.get(i).x - x, planets.get(i).y - y) < PLANET_RADIUS + 10) {
+				return planets.get(i);
+			}
+		}
+		return null;
+	}
+
+	public enum DrawingMode {
+		DRAW_PLANET,
+		DRAW_SPEED_VECTOR,
+		LET_MODIFY,
+		FREEZE
+	}
 
 	public static class Planet {
+		private int color;
+		private Random random;
 		public float x;
 		public float y;
 		public float newX;
@@ -155,13 +212,17 @@ public class DrawingView extends View {
 		public double vx;
 		public double vy;
 		public long weight;
+		public Vector vector;
 
-		public Planet(float x, float y, long weight, double vx, double vy) {
+		public Planet(float x, float y) {
+			random = new Random();
+			this.color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
 			this.x = x;
 			this.y = y;
-			this.weight = weight;
-			this.vx = vx;
-			this.vy = vy;
+			this.weight = 0;
+			this.vx = 0;
+			this.vy = 0;
+			vector = new Vector(x, y);
 		}
 
 		public void applyNewValues() {
@@ -171,6 +232,39 @@ public class DrawingView extends View {
 			vy = newVy;
 		}
 
+		public int getColor() {
+			return color;
+		}
+
+	}
+
+	public static class Vector {
+		public float x0;
+		public float y0;
+
+		private float x1;
+		private float y1;
+		private Path path;
+
+		public Vector(float x0, float y0) {
+			this.x0 = x0;
+			this.y0 = y0;
+			path = new Path();
+			x1 = 0;
+			y1 = 0;
+		}
+
+		public void setEndCoordinates(float x1, float y1) {
+			path.moveTo(x0, y0);
+			this.x1 = x1;
+			this.y1 = y1;
+			path.lineTo(x1, y1);
+			path.close();
+		}
+
+		public Path getPath() {
+			return path;
+		}
 	}
 
 	public void setPlanetSelectedCallback(PlanetSelectedCallback planetSelectedCallback) {
@@ -178,6 +272,6 @@ public class DrawingView extends View {
 	}
 
 	public interface PlanetSelectedCallback {
-		void onPlanetSelected(Planet planet);
+		void onPlanetSelected(Planet planet, boolean isNewPlanet);
 	}
 }

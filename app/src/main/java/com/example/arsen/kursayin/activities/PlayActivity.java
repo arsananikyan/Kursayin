@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import com.example.arsen.kursayin.GameSettings;
 import com.example.arsen.kursayin.R;
 import com.example.arsen.kursayin.custom_views.DrawingView;
+import com.example.arsen.kursayin.utils.Constants;
 
 public class PlayActivity extends AppCompatActivity {
 
@@ -18,31 +20,34 @@ public class PlayActivity extends AppCompatActivity {
 	private View doneBtn;
 	private View startBtn;
 	private View pauseBtn;
+	private int currentLvl;
+	private int neededPlanetsCount;
+	private TextView lvlInformation;
 	private DrawingView.Planet selectedPlanet;
+	private int addedPlanetsCount = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_play);
 		init();
-
+		currentLvl = getIntent().getIntExtra(Constants.EXTRA_PLAYING_LVL, 1);
+		neededPlanetsCount = GameSettings.getInstance().getPlanetsCountInLvl(currentLvl);
+		lvlInformation.setText("LVL:" + currentLvl + "\nPlanets:" + neededPlanetsCount);
 		startBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				drawingView.startMovie();
-			}
-		});
-
-		pauseBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				drawingView.pauseMovie();
+				drawingView.startPlaying();
 			}
 		});
 
 		drawingView.setPlanetSelectedCallback(new DrawingView.PlanetSelectedCallback() {
 			@Override
-			public void onPlanetSelected(DrawingView.Planet planet) {
+			public void onPlanetSelected(DrawingView.Planet planet, boolean isNewPlanet) {
+				if (isNewPlanet) {
+					addedPlanetsCount++;
+				}
+				weightEditText.setText(Long.toString(planet.weight));
 				menu.setVisibility(View.VISIBLE);
 				selectedPlanet = planet;
 			}
@@ -50,10 +55,17 @@ public class PlayActivity extends AppCompatActivity {
 		doneBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
+				String weightText = weightEditText.getText().toString();
+				if ("".equals(weightText) || weightText.equals(0))
+					return;
 				selectedPlanet.weight = Long.parseLong(weightEditText.getText() + "");
 				drawingView.invalidate();
 				closeKeyboard();
 				menu.setVisibility(View.GONE);
+				if(addedPlanetsCount < neededPlanetsCount)
+					drawingView.drawingMode = DrawingView.DrawingMode.DRAW_PLANET;
+				else
+					drawingView.drawingMode = DrawingView.DrawingMode.LET_MODIFY;
 			}
 		});
 	}
@@ -65,6 +77,7 @@ public class PlayActivity extends AppCompatActivity {
 		doneBtn = findViewById(R.id.done_btn);
 		startBtn = findViewById(R.id.start_btn);
 		pauseBtn = findViewById(R.id.pause_btn);
+		lvlInformation = (TextView) findViewById(R.id.lvl_information);
 	}
 
 	private void closeKeyboard() {

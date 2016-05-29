@@ -11,8 +11,17 @@
     tools:context=".activities.PlayActivity">
 
 
+    <TextView
+        android:id="@+id/lvl_information"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="#888"
+        android:gravity="center"/>
+
     <com.example.arsen.kursayin.custom_views.DrawingView
         android:id="@+id/drawingView"
+        android:layout_below="@id/lvl_information"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
@@ -22,6 +31,7 @@
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
         android:gravity="center"
+        android:background="#999"
         android:orientation="vertical"
         android:visibility="gone">
         <EditText
